@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartCare - AI Arrhythmia Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN Configured -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: ['class', '[data-theme="dark"]'],
+        theme: {
+          extend: {
+            colors: {
+              medical: {
+                blue: '#1E3A8A',
+                light: '#DBEAFE',
+                red: '#ef4444'
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+    
+    <!-- Navbar -->
+    <nav class="navbar sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+        <a href="/" class="nav-brand text-xl font-bold flex items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" class="text-red-500 w-8 h-8" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+            </svg>
+            HeartCare AI
+        </a>
+        <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+            <a href="#about" class="hover:text-blue-600 dark:hover:text-blue-400 transition">About</a>
+            <a href="#symptoms" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Symptoms</a>
+            <a href="#treatment" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Treatment</a>
+            <a href="#demo" class="hover:text-blue-600 dark:hover:text-blue-400 transition">AI Demo</a>
+            <a href="#hospitals" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Hospitals</a>
+        </div>
+        <button class="theme-toggle p-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition" id="themeToggle" aria-label="Toggle Theme"></button>
+    </nav>
+
+    <!-- SECTION 1: HOMEPAGE (Hero) -->
+    <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-20 px-6">
+        <!-- Animated Background ECG overlay handled in home.css -->
+        <div class="ecg-bg-wrapper absolute inset-0 z-0 opacity-20 pointer-events-none"></div>
+        <div class="relative z-10 max-w-5xl mx-auto text-center">
+            <span class="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-sm font-semibold mb-6 animate-fade-in-up">Deep Learning & ECG Data</span>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 animate-fade-in-up"" style="animation-delay: 100ms;">
+                AI-Powered Early Detection of <br class="hidden md:block"/> <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-red-500">Cardiac Arrhythmia</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-8 max-w-3xl mx-auto animate-fade-in-up" style="animation-delay: 200ms;">
+                Early diagnosis saves lives. Our advanced model analyzes ECG signals in seconds, detecting irregularities with high precision before they lead to severe complications.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up" style="animation-delay: 300ms;">
+                <a href="#demo" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 transform hover:-translate-y-1">
+                    <i class="fa-solid fa-heart-pulse"></i> Learn More / Demo
+                </a>
+                <a href="#symptoms" class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl font-semibold shadow hover:shadow-md transition flex items-center justify-center gap-2 transform hover:-translate-y-1">
+                    <i class="fa-solid fa-stethoscope"></i> Check Symptoms
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up" style="animation-delay: 400ms;">
+                <div class="glass-card p-6 rounded-2xl flex flex-col items-center">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">33.5M+</div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">People affected by Arrhythmia globally</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl flex flex-col items-center">
+                    <div class="text-4xl font-bold text-red-500 mb-2">5x</div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Increased risk of stroke in patients with AFib</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl flex flex-col items-center">
+                    <div class="text-4xl font-bold text-emerald-500 mb-2">&lt;2s</div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Average prediction time using our AI model</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: ABOUT CARDIAC ARRHYTHMIA -->
+    <section id="about" class="py-20 px-6 bg-slate-100 dark:bg-slate-800/50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold mb-4">What is Cardiac Arrhythmia?</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+                    An irregular heartbeat caused by abnormal electrical activity in the heart. The heart may beat too fast, too slow, or irregularly, affecting the blood flow to the body.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Tachycardia -->
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm hover:shadow-xl transition group">
+                    <div class="w-14 h-14 bg-red-100 text-red-600 dark:bg-red-900/30 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Tachycardia</h3>
+                    <p class="text-slate-600 dark:text-slate-400">A resting heart rate that is greater than 100 beats per minute. Warning signs include rapid pulse and chest flutter.</p>
+                </div>
+                <!-- Bradycardia -->
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm hover:shadow-xl transition group">
+                    <div class="w-14 h-14 bg-blue-100 text-blue-600 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Bradycardia</h3>
+                    <p class="text-slate-600 dark:text-slate-400">A resting heart rate of less than 60 beats per minute. Can lead to inadequate blood flow, causing fatigue and fainting.</p>
+                </div>
+                <!-- AFib -->
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm hover:shadow-xl transition group">
+                    <div class="w-14 h-14 bg-purple-100 text-purple-600 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Atrial Fibrillation (AFib)</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Irregular and rapid heart rhythm originating in the atria. Increases stroke risk massively if left untreated.</p>
+                </div>
+                <!-- V-Fib -->
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm hover:shadow-xl transition group">
+                    <div class="w-14 h-14 bg-orange-100 text-orange-600 dark:bg-orange-900/30 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Ventricular Fibrillation</h3>
+                    <p class="text-slate-600 dark:text-slate-400">A critical, life-threatening condition where the ventricles quiver uselessly instead of pumping blood. Requires instant shock.</p>
+                </div>
+                <!-- Premature Heartbeats -->
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm hover:shadow-xl transition group">
+                    <div class="w-14 h-14 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-wave-square"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Premature Heartbeats</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Extra, early beats that briefly interrupt your regular heart rhythm. Often felt as a "skipped" beat in the chest.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: SYMPTOMS SECTION (INTERACTIVE) -->
+    <section id="symptoms" class="py-20 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="text-red-500 font-semibold tracking-wide uppercase text-sm">Interactive Analyzer</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2">Symptom Checker</h2>
+                <p class="text-slate-600 dark:text-slate-400 mt-4">Select your current symptoms to instantly evaluate your risk level. If you experience critical symptoms, seek help immediately.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white dark:bg-slate-800 p-8 md:p-12 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-700">
+                <!-- Checkboxes -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-6 flex items-center gap-2"><i class="fa-solid fa-clipboard-list text-blue-500"></i> Basic Symptoms</h3>
+                    <div class="space-y-4 mb-8">
+                        <label class="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                            <input type="checkbox" class="w-5 h-5 symptom-check basic" value="1">
+                            <span class="font-medium">Palpitations (fluttering chest)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                            <input type="checkbox" class="w-5 h-5 symptom-check basic" value="1">
+                            <span class="font-medium">Mild dizziness</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                            <input type="checkbox" class="w-5 h-5 symptom-check basic" value="1">
+                            <span class="font-medium">Fatigue or weakness</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                            <input type="checkbox" class="w-5 h-5 symptom-check basic" value="1">
+                            <span class="font-medium">Mild shortness of breath</span>
+                        </label>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mb-6 flex items-center gap-2 text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation"></i> Critical Symptoms</h3>
+                    <div class="space-y-4">
+                        <label class="flex items-center gap-3 p-3 border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                            <input type="checkbox" class="w-5 h-5 symptom-check critical accent-red-600" value="5">
+                            <span class="font-medium text-red-700 dark:text-red-400">Chest pain or pressure</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                            <input type="checkbox" class="w-5 h-5 symptom-check critical accent-red-600" value="5">
+                            <span class="font-medium text-red-700 dark:text-red-400">Fainting (Syncope)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                            <input type="checkbox" class="w-5 h-5 symptom-check critical accent-red-600" value="5">
+                            <span class="font-medium text-red-700 dark:text-red-400">Severe breathlessness</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Result area -->
+                <div class="flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+                    <div id="risk-dial" class="w-32 h-32 rounded-full border-8 border-slate-200 dark:border-slate-700 flex items-center justify-center mb-6 transition-colors duration-500">
+                        <span id="risk-score" class="text-3xl font-bold">0%</span>
+                    </div>
+                    <h3 id="risk-title" class="text-2xl font-bold mb-3">Low Risk</h3>
+                    <p id="risk-desc" class="text-slate-600 dark:text-slate-400">Select symptoms to see your risk level. Routine monitoring is sufficient.</p>
+                    
+                    <a id="symptom-cta" href="#demo" class="mt-8 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition hidden">
+                        Proceed to AI Diagnosis
+                    </a>
+                    <a id="emergency-cta" href="#contact" class="mt-8 px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition hidden flex items-center gap-2">
+                        <i class="fa-solid fa-phone-volume"></i> Emergency Contacts
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: TREATMENT & MEDICATION -->
+    <section id="treatment" class="py-20 px-6 bg-slate-100 dark:bg-slate-800/50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold text-center mb-16">Treatment Pathways</h2>
+            
+            <!-- Flowchart visualization -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-16 relative">
+                <div class="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 -translate-y-1/2 z-0"></div>
+                
+                <div class="relative z-10 bg-white dark:bg-slate-800 w-full md:w-1/4 p-6 rounded-xl shadow-md border-t-4 border-blue-500 text-center">
+                    <div class="w-12 h-12 mx-auto bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-stethoscope"></i></div>
+                    <h4 class="font-bold mb-2">1. Diagnosis</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">ECG, Holter monitor, and AI analysis</p>
+                </div>
+                <!-- Arrow for mobile -->
+                <i class="fa-solid fa-arrow-down text-2xl text-slate-300 md:hidden"></i>
+                
+                <div class="relative z-10 bg-white dark:bg-slate-800 w-full md:w-1/4 p-6 rounded-xl shadow-md border-t-4 border-purple-500 text-center">
+                    <div class="w-12 h-12 mx-auto bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-pills"></i></div>
+                    <h4 class="font-bold mb-2">2. Medication</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Rate & rhythm control drugs</p>
+                </div>
+                <i class="fa-solid fa-arrow-down text-2xl text-slate-300 md:hidden"></i>
+                
+                <div class="relative z-10 bg-white dark:bg-slate-800 w-full md:w-1/4 p-6 rounded-xl shadow-md border-t-4 border-orange-500 text-center">
+                    <div class="w-12 h-12 mx-auto bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-user-doctor"></i></div>
+                    <h4 class="font-bold mb-2">3. Procedure</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Ablation or Pacemakers if needed</p>
+                </div>
+                <i class="fa-solid fa-arrow-down text-2xl text-slate-300 md:hidden"></i>
+                
+                <div class="relative z-10 bg-white dark:bg-slate-800 w-full md:w-1/4 p-6 rounded-xl shadow-md border-t-4 border-emerald-500 text-center">
+                    <div class="w-12 h-12 mx-auto bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-heart-circle-check"></i></div>
+                    <h4 class="font-bold mb-2">4. Recovery</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Lifestyle changes & continuous monitoring</p>
+                </div>
+            </div>
+
+            <!-- Treatment Details Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Meds -->
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow">
+                    <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-prescription-bottle-medical text-blue-500"></i> Medical Treatments</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                            <div><strong>Anti-arrhythmic drugs:</strong> Restore normal heart rhythm.</div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                            <div><strong>Beta-blockers:</strong> Slow down the heart rate and calm irregular beats.</div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                            <div><strong>Blood thinners:</strong> Prescribed for AFib patients to dramatically reduce stroke risk.</div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Procedures -->
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow">
+                    <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-scalpel text-orange-500"></i> Advanced Procedures</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                            <div><strong>Catheter Ablation:</strong> Destroys small areas of heart tissue causing abnormal signals.</div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                            <div><strong>Pacemaker:</strong> Implanted device that regulates slow heartbeats.</div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                            <div><strong>Defibrillator (ICD):</strong> Monitors rhythm and delivers life-saving shocks for V-Fib.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: LIFESTYLE & RECOVERY -->
+    <section class="py-20 px-6 overflow-hidden">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold text-center mb-4">Lifestyle & Wellness Guide</h2>
+            <p class="text-center text-slate-600 dark:text-slate-400 mb-16 max-w-2xl mx-auto">Managing arrhythmia goes beyond the hospital. Daily habits are critical for a healthy heart rhythm.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Diet -->
+                <div class="group relative bg-emerald-50 dark:bg-emerald-900/10 p-8 rounded-3xl overflow-hidden border border-emerald-100 dark:border-emerald-800">
+                    <div class="absolute -right-6 -top-6 text-emerald-200 dark:text-emerald-900/30 text-9xl group-hover:scale-110 transition duration-500 pointer-events-none">
+                        <i class="fa-solid fa-apple-whole"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl mb-6 shadow-lg shadow-emerald-500/30">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Heart-Healthy Diet</h3>
+                        <ul class="space-y-3 font-medium text-slate-700 dark:text-slate-300">
+                            <li>• Low salt & low saturated fat</li>
+                            <li>• Increase Potassium & Magnesium</li>
+                            <li>• Superfoods: Bananas, spinach, salmon</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Habits -->
+                <div class="group relative bg-blue-50 dark:bg-blue-900/10 p-8 rounded-3xl overflow-hidden border border-blue-100 dark:border-blue-800">
+                    <div class="absolute -right-6 -top-6 text-blue-200 dark:text-blue-900/30 text-9xl group-hover:scale-110 transition duration-500 pointer-events-none">
+                        <i class="fa-solid fa-person-running"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl mb-6 shadow-lg shadow-blue-500/30">
+                            <i class="fa-solid fa-dumbbell"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Daily Habits</h3>
+                        <ul class="space-y-3 font-medium text-slate-700 dark:text-slate-300">
+                            <li>• Regular moderate exercise</li>
+                            <li>• Strict avoidance of smoking/alcohol</li>
+                            <li>• Reduce or eliminate caffeine</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="group relative bg-purple-50 dark:bg-purple-900/10 p-8 rounded-3xl overflow-hidden border border-purple-100 dark:border-purple-800">
+                    <div class="absolute -right-6 -top-6 text-purple-200 dark:text-purple-900/30 text-9xl group-hover:scale-110 transition duration-500 pointer-events-none">
+                        <i class="fa-solid fa-watch-fitness"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-purple-500 text-white rounded-full flex items-center justify-center text-xl mb-6 shadow-lg shadow-purple-500/30">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Monitoring</h3>
+                        <ul class="space-y-3 font-medium text-slate-700 dark:text-slate-300">
+                            <li>• Daily pulse checks</li>
+                            <li>• Smartwatch ECG monitoring</li>
+                            <li>• Stress management (Yoga, Meditation)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 6: AI / DEEP LEARNING MODULE & DEMO -->
+    <section id="demo" class="py-20 px-6 relative overflow-hidden bg-slate-900 text-white">
+        <!-- Abstract AI background elements -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+            <div class="absolute w-96 h-96 bg-blue-600/20 rounded-full blur-3xl -top-20 -left-20"></div>
+            <div class="absolute w-96 h-96 bg-purple-600/20 rounded-full blur-3xl bottom-0 right-0"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto relative z-10 flex flex-col lg:flex-row gap-12 items-center">
+            
+            <!-- Tech Stack & Features -->
+            <div class="flex-1">
+                <span class="text-blue-400 font-bold uppercase tracking-wider text-sm">Powered by Deep Learning</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-6 text-white">Live AI Prediction Engine</h2>
+                <p class="text-lg text-slate-300 mb-8 border-l-4 border-blue-500 pl-4">
+                    Our CNN-LSTM deep learning architecture processes sequential ECG data to classify arrhythmias with unprecedented accuracy, enabling proactive intervention.
+                </p>
+                
+                <div class="grid grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <h4 class="font-bold text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-microchip text-blue-400"></i> Features</h4>
+                        <ul class="space-y-2 text-slate-400 text-sm">
+                            <li>• Direct ECG signal upload</li>
+                            <li>• Extracted sequence processing</li>
+                            <li>• Multi-class prediction</li>
+                            <li>• Confidence scoring</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-code text-purple-400"></i> Stack</h4>
+                        <ul class="space-y-2 text-slate-400 text-sm">
+                            <li>• TensorFlow / Keras Model</li>
+                            <li>• Python Data Preprocessing</li>
+                            <li>• Flask RESTful Backend</li>
+                            <li>• Modern Async Frontend</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Patient Intake Form from previous home.html integrated perfectly -->
+            <div class="flex-1 w-full max-w-lg">
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl">
+                    <header class="mb-6">
+                        <h3 class="text-2xl font-bold text-white">1. Patient Intake</h3>
+                        <p class="text-slate-300 text-sm">Complete profile to proceed to ECG upload</p>
+                    </header>
+
+                    <form id="patient-form" class="space-y-4">
+                        <div class="relative">
+                            <input type="text" id="fullName" name="fullName" required class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-transparent peer focus:border-blue-500 focus:outline-none transition" placeholder="Full Name">
+                            <label for="fullName" class="absolute left-4 -top-2.5 bg-slate-900 px-1 text-xs text-blue-400 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:text-slate-400 transition-all peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-400">Full Name</label>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative">
+                                <input type="number" id="age" name="age" required min="1" max="150" class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-transparent peer focus:border-blue-500 focus:outline-none" placeholder="Age">
+                                <label for="age" class="absolute left-4 -top-2.5 bg-slate-900 px-1 text-xs text-blue-400 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:text-slate-400 transition-all peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-400">Age</label>
+                            </div>
+                            <div class="relative">
+                                <select id="gender" name="gender" required class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 items-center text-white focus:border-blue-500 focus:outline-none appearance-none">
+                                    <option value="" disabled selected>Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative">
+                                <input type="number" id="heartRate" name="heartRate" required class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-transparent peer focus:border-blue-500 focus:outline-none" placeholder="BPM">
+                                <label for="heartRate" class="absolute left-4 -top-2.5 bg-slate-900 px-1 text-xs text-blue-400 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:text-slate-400 transition-all peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-400">Heart Rate (BPM)</label>
+                            </div>
+                            <div class="relative">
+                                <input type="text" id="bloodPressure" name="bloodPressure" required pattern="\d{2,3}\/\d{2,3}" class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-transparent peer focus:border-blue-500 focus:outline-none" placeholder="120/80">
+                                <label for="bloodPressure" class="absolute left-4 -top-2.5 bg-slate-900 px-1 text-xs text-blue-400 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:text-slate-400 transition-all peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-400">BP (mmHg)</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-1 mt-4 flex justify-center items-center gap-2">
+                            Proceed to ECG Upload <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 7: BEST HOSPITALS IN TAMIL NADU -->
+    <section id="hospitals" class="py-20 px-6 bg-slate-50 dark:bg-slate-900">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold text-center mb-4">Top Cardiology Hospitals in TN</h2>
+            <p class="text-center text-slate-600 dark:text-slate-400 mb-12">Expert electrophysiologists and modern ablation facilities available near you.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Hospital 1 -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow border border-slate-200 dark:border-slate-700 hover:shadow-xl transition">
+                    <div class="h-3 bg-red-600"></div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-xl mb-1">Apollo Hospitals</h3>
+                        <div class="text-sm text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Greams Road, Chennai</div>
+                        <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Pioneers in advanced cardiac care, housing dedicated Electrophysiology labs and robotic surgeries.</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 px-2 py-1 rounded">24/7 ECG</span>
+                            <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 px-2 py-1 rounded">Ablation AI</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Hospital 2 -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow border border-slate-200 dark:border-slate-700 hover:shadow-xl transition">
+                    <div class="h-3 bg-blue-600"></div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-xl mb-1">Kauvery Hospital</h3>
+                        <div class="text-sm text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Tennur, Trichy</div>
+                        <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Leading heart institute specializing in non-pharmacological management of arrhythmias and pacemaker therapy.</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 px-2 py-1 rounded">Cardiac ICU</span>
+                            <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 px-2 py-1 rounded">Defibrillation</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Hospital 3 -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow border border-slate-200 dark:border-slate-700 hover:shadow-xl transition">
+                    <div class="h-3 bg-emerald-600"></div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-xl mb-1">PSG Hospitals</h3>
+                        <div class="text-sm text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Peelamedu, Coimbatore</div>
+                        <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Renowned academic medical center providing specialized heart rhythm clinics and rapid diagnostic pathways.</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 px-2 py-1 rounded">Holter Monitor</span>
+                            <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 px-2 py-1 rounded">Cardioversion</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Hospital 4 -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow border border-slate-200 dark:border-slate-700 hover:shadow-xl transition">
+                    <div class="h-3 bg-orange-600"></div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-xl mb-1">Dr. Kamakshi Memorial</h3>
+                        <div class="text-sm text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Pallikaranai, Chennai</div>
+                        <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Comprehensive electrophysiology lab with excellent success rates in complex ablation procedures.</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 px-2 py-1 rounded">EP Study Lab</span>
+                            <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 px-2 py-1 rounded">Angiogram</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Hospital 5 -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow border border-slate-200 dark:border-slate-700 hover:shadow-xl transition">
+                    <div class="h-3 bg-teal-600"></div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-xl mb-1">Manipal Hospitals</h3>
+                        <div class="text-sm text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Dalmia Board, Salem</div>
+                        <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">State-of-the-art emergency cardiac care providing immediate response treating sudden cardiac arrests.</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 px-2 py-1 rounded">Telemetry</span>
+                            <span class="bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 px-2 py-1 rounded">Critical Care</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 8: DATA VISUALIZATION SECTION -->
+    <section class="py-20 px-6 bg-white dark:bg-slate-800">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold text-center mb-12">Clinical Analytics & Insights</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Chart 1 -->
+                <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold mb-6 text-center">Diagnostic Accuracy: Traditional vs AI</h3>
+                    <div class="w-full h-64 relative">
+                        <canvas id="accuracyChart"></canvas>
+                    </div>
+                </div>
+                <!-- Chart 2 -->
+                <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xl font-bold mb-6 text-center">Arrhythmia Demographics (Risk Factors)</h3>
+                    <div class="w-full h-64 relative flex justify-center">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 9: CONTACT & EMERGENCY -->
+    <section id="contact" class="py-20 px-6 bg-red-50 dark:bg-red-900/10 border-t border-b border-red-100 dark:border-red-900/30">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400 font-bold mb-4 animate-pulse">
+                    <i class="fa-solid fa-circle-dot h-3 w-3"></i> EMERGENCY ASSISTANCE
+                </div>
+                <h2 class="text-3xl md:text-5xl font-bold mb-6">Need Immediate Help?</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 mb-8">If you or someone else is experiencing severe chest pain, shortness of breath, or fainting, do not wait.</p>
+                
+                <div class="space-y-4">
+                    <a href="tel:108" class="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-red-200 dark:border-red-800 shadow-sm hover:shadow-md transition">
+                        <div class="w-12 h-12 bg-red-100 text-red-600 dark:bg-red-900/50 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-truck-medical"></i></div>
+                        <div>
+                            <div class="font-bold text-xl">Call 108</div>
+                            <div class="text-sm text-slate-500">National Ambulance Service (India)</div>
+                        </div>
+                    </a>
+                    <a href="tel:112" class="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                        <div class="w-12 h-12 bg-slate-100 text-slate-600 dark:bg-slate-700 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-phone"></i></div>
+                        <div>
+                            <div class="font-bold text-xl">Call 112</div>
+                            <div class="text-sm text-slate-500">Universal Emergency Helpline</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                <h3 class="text-2xl font-bold mb-6">Consult a Cardiologist</h3>
+                <form class="space-y-4" onsubmit="event.preventDefault(); alert('Consultation requested. Our team will contact you shortly.');">
+                    <input type="text" placeholder="Your Name" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3">
+                    <input type="tel" placeholder="Phone Number" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3">
+                    <textarea placeholder="Describe your symptoms or concerns..." rows="3" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3"></textarea>
+                    <button type="submit" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-3 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition">Request Callback</button>
+                </form>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12 px-6 text-center text-sm">
+        <div class="max-w-4xl mx-auto flex flex-col items-center">
+            <a href="/" class="flex items-center gap-2 text-white font-bold text-xl mb-6">
+                <i class="fa-solid fa-heart-pulse text-red-500"></i> HeartCare AI
+            </a>
+            <p class="mb-4">This platform is for educational and AI analytical purposes. Always consult a qualified medical professional for health decisions.</p>
+            <p>&copy; 2026 Deep Learning Project. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- SECTION 10: EXTRA FEATURES (Floating Chatbot / Assistant) -->
+    <!-- We will use an external file for custom JS functions to keep it clean -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="floatingAssistantBtn" class="flex items-center justify-center w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl hover:scale-110 hover:shadow-blue-500/50 transition duration-300 relative group animate-bounce">
+            <i class="fa-solid fa-user-doctor text-2xl"></i>
+            <!-- Tooltip -->
+            <span class="absolute right-full mr-4 bg-slate-800 text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                AI Assistant
+            </span>
+        </button>
+    </div>
+
+    <!-- Assistant Modal Mock -->
+    <div id="assistantModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-robot"></i></div>
+                    <div class="font-bold">Virtual Cardiologist</div>
+                </div>
+                <button id="closeAssistant" class="text-white hover:text-slate-200 text-xl">&times;</button>
+            </div>
+            <div class="p-6 h-64 overflow-y-auto bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl rounded-tl-none shadow-sm inline-block max-w-[85%] text-sm mb-4 border border-slate-100 dark:border-slate-700">
+                    Hello! I'm your AI assistant. Upload your ECG in the Dashboard to get personalized guidance, or ask me about symptoms here!
+                </div>
+            </div>
+            <div class="p-4 bg-white dark:bg-slate-800">
+                <div class="relative">
+                    <input type="text" placeholder="Type a symptom..." class="w-full bg-slate-100 dark:bg-slate-900 rounded-full pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/global.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/landing-interactions.js') }}"></script>
+    <!-- Keeping existing home.js for patient form submission logic compatibility -->
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+</body>
+</html>

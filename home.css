@@ -1,0 +1,82 @@
+/* Modernized home.css for Landing Page */
+
+/* ECG Animated Background */
+.ecg-bg-wrapper {
+    background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.4) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    animation: pan-bg 40s linear infinite;
+}
+
+[data-theme="light"] .ecg-bg-wrapper {
+    background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+}
+
+@keyframes pan-bg {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* Add an SVG ECG wave background overlay */
+.ecg-bg-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 200%;
+    height: 200px;
+    transform: translateY(-50%);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'%3E%3Cpath stroke='rgba(239, 68, 68, 0.3)' stroke-width='3' fill='none' d='M0,50 L200,50 L220,10 L250,90 L270,50 L400,50 L420,10 L450,90 L470,50 L600,50 L620,10 L650,90 L670,50 L800,50 L820,10 L850,90 L870,50 L1000,50' /%3E%3C/svg%3E") repeat-x;
+    background-size: 1000px 100px;
+    animation: pan-ecg 10s linear infinite;
+}
+
+[data-theme="light"] .ecg-bg-wrapper::after {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'%3E%3Cpath stroke='rgba(239, 68, 68, 0.15)' stroke-width='3' fill='none' d='M0,50 L200,50 L220,10 L250,90 L270,50 L400,50 L420,10 L450,90 L470,50 L600,50 L620,10 L650,90 L670,50 L800,50 L820,10 L850,90 L870,50 L1000,50' /%3E%3C/svg%3E") repeat-x;
+}
+
+@keyframes pan-ecg {
+    0% { background-position: 0 0; }
+    100% { background-position: -1000px 0; }
+}
+
+/* Animations */
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Glass Card */
+.glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .glass-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Smooth Scrolling is enabled in interactions js, but adding to html just in case */
+html {
+    scroll-behavior: smooth;
+}
